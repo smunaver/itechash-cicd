@@ -1,0 +1,25 @@
+PHASE 1 — Put your local folders into GitHub
+
+You already have repo:
+👉 https://github.com/smunaver/itechash-cicd.git
+
+Now we connect your local code (D:\itechash) to Git.
+
+Step 1: Open terminal in your folder
+cd D:\itechash
+Step 2: Initialize Git
+git init
+Step 3: Connect to your GitHub repo
+git remote add origin https://github.com/smunaver/itechash-cicd.git
+Step 4: Add all your folders
+
+(THIS includes all your APIs like ApiGateway, Payroll, etc.)
+
+git add .
+Step 5: Commit
+git commit -m "Initial commit - all APIs"
+Step 6: Push to GitHub
+git branch -M main
+git push -u origin main
+
+✅ Now your code is in GitHub
