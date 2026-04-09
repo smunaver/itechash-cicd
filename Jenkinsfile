@@ -24,12 +24,13 @@ pipeline {
                         changedFiles = "FORCE_ALL"
                     }
 
-                    // If no files changed (empty string), also force all for the first time
+                    // Force build if it's a new workspace or no files detected
                     if (!changedFiles) { changedFiles = "FORCE_ALL" }
 
                     services.each { name ->
                         if (changedFiles.contains(name) || changedFiles.contains("docker-compose.yml") || changedFiles == "FORCE_ALL") {
                             echo "--- Publishing ${name} ---"
+                            // Publish to the root of the service folder so your Dockerfile finds the DLLs
                             sh "dotnet publish ${name}/${name}.csproj -c Release -o ./${name}/"
                         }
                     }
@@ -40,8 +41,8 @@ pipeline {
         stage('Docker Deploy') {
             steps {
                 echo 'Refreshing containers on localhost...'
-                // Using hyphenated version for older Docker versions
-                sh 'docker-compose up -d --build'
+                // DOCKER_BUILDKIT=0 and COMPOSE_DOCKER_CLI_BUILD=0 bypass the Buildx requirement
+                sh 'export DOCKER_BUILDKIT=0 && export COMPOSE_DOCKER_CLI_BUILD=0 && docker-compose up -d --build'
             }
         }
     }
