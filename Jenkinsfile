@@ -3,13 +3,6 @@ pipeline {
 
     stages {
         stage('Build & Publish') {
-            // This runs the .NET SDK container to compile your code
-            agent {
-                docker { 
-                    image 'mcr.microsoft.com/dotnet/sdk:8.0' 
-                    reuseNode true
-                }
-            }
             steps {
                 script {
                     def services = [
@@ -19,19 +12,20 @@ pipeline {
                         'MasterData.API': '5006', 'Payroll.API': '5007'
                     ]
 
-                    // Get list of changed files
-                    def changedFiles = sh(script: "git diff --name-only HEAD~1 HEAD", returnStdout: true).trim().split('\n')
+                    // Get list of changed files between the last two commits
+                    // If this is the first build, it might need 'git diff --name-only HEAD^ HEAD'
+                    def changedFiles = sh(script: "git diff --name-only HEAD~1 HEAD || git ls-files", returnStdout: true).trim().split('\n')
 
                     services.each { name, port ->
-                        // Check if files in the service folder or the root compose/Jenkinsfile changed
                         if (changedFiles.any { it.startsWith(name + "/") } || changedFiles.contains("docker-compose.yml")) {
-                            echo "Building and Publishing ${name}..."
+                            echo "--- Processing ${name} ---"
                             
-                            // Publish directly into the service folder so the Dockerfile 'COPY . .' works
-                            sh "dotnet publish ${name}/${name}.csproj -c Release -o ./${name}/out"
+                            // 1. Restore & Publish using the host's dotnet (or inside the container)
+                            sh "dotnet publish ${name}/${name}.csproj -c Release -o ./${name}/publish"
                             
-                            // Move files up so they are in the root of the build context as expected by your Dockerfile
-                            sh "mv ./${name}/out/* ./${name}/ && rm -rf ./${name}/out"
+                            // 2. Clean up and prepare files for Docker 'COPY . .'
+                            // We move published files to the root of the service folder
+                            sh "cp -r ./${name}/publish/* ./${name}/"
                         }
                     }
                 }
@@ -40,16 +34,17 @@ pipeline {
 
         stage('Docker Deploy') {
             steps {
-                echo 'Updating localhost containers...'
-                // This command runs on the host via the mapped docker.sock
+                echo 'Updating localhost containers via Docker Compose...'
+                // This uses the docker.sock you mapped to the host
                 sh 'docker-compose up -d --build'
             }
         }
     }
 
     post {
-        success {
-            echo "Successfully updated microservices on localhost."
+        always {
+            // Optional: Clean up publish folders to keep the workspace tidy
+            sh 'find . -name "publish" -type d -exec rm -rf {} + || true'
         }
     }
 }
