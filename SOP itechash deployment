@@ -23,3 +23,24 @@ git branch -M main
 git push -u origin main
 
 ✅ Now your code is in GitHub
+
+
+in each folder create and 
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+
+WORKDIR /app
+COPY . .
+
+ENV ASPNETCORE_URLS=http://+:5003
+
+EXPOSE 5003
+
+ENTRYPOINT ["dotnet", "Employee.API.dll"]
+
+
+then in the root where the docker-compose.yml file is run
+
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
