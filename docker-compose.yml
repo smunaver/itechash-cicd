@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+
+  apigateway:
+    build: ./ApiGateway
+    ports:
+      - "5000:5000"
+
+  attendance:
+    build: ./Attendance.API
+    ports:
+      - "5001:5001"
+
+  asset:
+    build: ./Asset.API
+    ports:
+      - "5002:5002"
+
+  employee:
+    build: ./Employee.API
+    ports:
+      - "5003:5003"
+
+  leave:
+    build: ./Leave.API
+    ports:
+      - "5005:5005"
+
+  identity:
+    build: ./Identity.API
+    ports:
+      - "5004:5004"
+
+  master:
+    build: ./MasterData.API
+    ports:
+      - "5006:5006"
+
+  payroll:
+    build: ./Payroll.API
+    ports:
+      - "5007:5007"

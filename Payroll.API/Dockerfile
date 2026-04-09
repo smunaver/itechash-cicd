@@ -1,0 +1,14 @@
+# Use .NET runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+
+# Set working directory
+WORKDIR /app
+
+# Copy all files
+COPY . .
+ENV ASPNETCORE_URLS=http://+:5007
+# Expose port (change per API later)
+EXPOSE 5007
+
+# Run app
+ENTRYPOINT ["dotnet", "Payroll.API.dll"]
