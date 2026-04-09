@@ -1,22 +1,11 @@
 pipeline {
     agent any
 
-    environment {
-        COMPOSE_FILE = 'docker-compose.yml'
-    }
-
     stages {
 
         stage('Checkout Code') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Verify Files') {
-            steps {
-                sh 'pwd'
-                sh 'ls -la'
             }
         }
 
@@ -28,7 +17,7 @@ pipeline {
 
         stage('Build & Deploy') {
             steps {
-                sh 'docker compose up -d'
+                sh 'docker-compose up -d --build'
             }
         }
 
